@@ -1,0 +1,12 @@
+[project]
+name = "certan-milestone-1"
+version = "0.1.0"
+description = "Milestone 1: Business Problem Framing, PEAS Specification, and Baseline Search Algorithm (UCS / A*)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.4.6",
+    "pandas>=3.0.5",
+    "pytest>=9.1.1",
+    "scipy>=1.17.1",
+]
