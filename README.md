@@ -24,6 +24,84 @@ Repositori ini merupakan implementasi dan serahan Milestone 1 untuk perancangan 
 
 ---
 
+## 📋 Panduan Pengerjaan & Lokasi Berkas per Anggota
+
+Agar pengerjaan teratur, bebas dari tabrakan file (*merge conflict*), dan kontribusi di GitHub tercatat seimbang oleh seluruh anggota (sesuai rubrik penilaian 30%), ikuti pembagian peran dan lokasi kerja berikut:
+
+### 🔵 1. Anggota 1: AI Solutions Architect & Business Analyst
+* **Fokus Tanggung Jawab:** Analisis domain bisnis nyata, formulasi *pain points*, perumusan matriks spesifikasi formal PEAS, dan karakteristik 6 dimensi lingkungan operasional.
+* **Berkas yang Dikerjakan:**
+  * 📄 `docs/problem_framing.md` : Profil organisasi/bisnis, alur proses *as-is*, analisis *pain points*, dan justifikasi AI.
+  * 📄 `docs/peas_specification.md` : Matriks PEAS kuantitatif & analisis 6 dimensi lingkungan operasional.
+  * 📑 **Laporan PDF:** Bab 1 (*Problem Framing*) & Bab 2 (*Spesifikasi Agen PEAS*).
+* **Perintah Commit Bertahap:**
+  ```bash
+  git pull origin main
+  # Kerjakan problem framing
+  git add docs/problem_framing.md
+  git commit -m "docs(framing): tambahkan profil bisnis dan analisis pain points"
+  git push origin main
+
+  # Kerjakan spesifikasi PEAS
+  git add docs/peas_specification.md
+  git commit -m "docs(peas): rumuskan matriks formal PEAS dan 6 dimensi lingkungan"
+  git push origin main
+  ```
+
+---
+
+### 🟢 2. Anggota 2 (Boy Harendy): Algorithm & Data Modeling Engineer
+* **Fokus Tanggung Jawab:** Formulasi matematis ruang keadaan $(X, A, T, G, C)$, pemodelan graf keputusan bisnis berbobot riil, dan implementasi algoritma penelusuran optimal berbasis modul `heapq`.
+* **Berkas yang Dikerjakan:**
+  * 🐍 `src/graph_model.py` : Pemodelan matematis 5-tupel $(X, A, T, G, C)$ dan struktur data graf (adjacency list & edge weights).
+  * 🐍 `src/search.py` : Engine algoritma Uniform Cost Search (UCS) atau A* Search menggunakan `heapq`.
+  * 🐍 `src/heuristics.py` : Fungsi heuristik $h(n)$ yang terbukti *admissible* ($h(n) \le h^*(n)$) jika memakai A*.
+  * 📑 **Laporan PDF:** Bab 3 (*Formulasi Ruang Keadaan & Algoritma Penelusuran*).
+* **Perintah Commit Bertahap:**
+  ```bash
+  git pull origin main
+  # Kerjakan pemodelan graf
+  git add src/graph_model.py
+  git commit -m "feat(graph): inisialisasi pemodelan ruang keadaan dan graf alur bisnis"
+  git push origin main
+
+  # Kerjakan modul pencarian
+  git add src/search.py src/heuristics.py
+  git commit -m "feat(search): implementasi algoritma penelusuran optimal berbasis heapq"
+  git push origin main
+  ```
+
+---
+
+### 🟣 3. Anggota 3: DevOps, QA & Documentation Lead
+* **Fokus Tanggung Jawab:** Konfigurasi lingkungan Astral `uv`, pengujian otomatis (*unit testing*) dengan `pytest`, penyusunan diagram arsitektur, dokumentasi `README.md`, dan kompilasi laporan serahan akhir.
+* **Berkas yang Dikerjakan:**
+  * ⚙️ `pyproject.toml`, `uv.lock`, `.gitignore`, `LICENSE` : Setup dependensi dan lisensi.
+  * 🧪 `tests/test_search.py` : Kasus uji unit testing dengan `pytest` (jalur optimal, penanganan siklus/graf terputus, validasi `heapq`).
+  * 📘 `README.md` : Dokumentasi repositori, panduan eksekusi, dan diagram alur sistem.
+  * 📑 **Laporan PDF:** Halaman Judul/Cover, Bab 4 (*Standar Repositori & Hasil Uji*), serta ekspor akhir `Grup{Kode}-Tugas01.pdf`.
+* **Perintah Commit Bertahap:**
+  ```bash
+  git pull origin main
+  # Kerjakan pengujian unit testing
+  git add tests/test_search.py
+  git commit -m "test(search): tambahkan unit testing pytest untuk validasi algoritma"
+  git push origin main
+
+  # Perbarui dokumentasi repo
+  git add README.md
+  git commit -m "docs(readme): lengkapi dokumentasi proyek dan diagram alur sistem"
+  git push origin main
+  ```
+
+---
+
+### ⚠️ Aturan Emas Kolaborasi Tim (Mencegah Merge Conflict)
+1. **Wajib `git pull origin main`:** Selalu ambil pembaruan terbaru sebelum mulai mengedit atau sebelum melakukan `git push`.
+2. **Hanya `git add` Berkas Milik Sendiri:** Jangan gunakan `git add .` sembarangan! Tambahkan hanya berkas yang menjadi area tanggung jawab masing-masing (contoh: `git add docs/...` atau `git add src/...`).
+3. **Commit dari Akun Masing-Masing:** Seluruh 3 anggota wajib melakukan commit dan push dari laptop dan akun GitHub masing-masing agar statistik di menu **Insights → Contributors** tercatat seimbang dan dinilai penuh oleh dosen.
+
+
 ## 🏗️ Struktur Repositori
 
 ```text
@@ -81,8 +159,8 @@ Proyek ini menggunakan manajer paket modern **[Astral uv](https://docs.astral.sh
 
 ### 2. Kloning Repositori
 ```bash
-git clone https://github.com/boyharendy/certan-milestone-1.git
-cd certan-milestone-1
+git clone https://github.com/boyharendy/T01_Milestone1_Problem_Framing_PEAS.git
+cd T01_Milestone1_Problem_Framing_PEAS
 ```
 
 ### 3. Sinkronisasi Virtual Environment & Dependensi

@@ -5,8 +5,10 @@ description = "Milestone 1: Business Problem Framing, PEAS Specification, and Ba
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "google-genai>=2.22.0",
     "numpy>=2.4.6",
     "pandas>=3.0.5",
     "pytest>=9.1.1",
+    "python-dotenv>=1.2.3",
     "scipy>=1.17.1",
 ]
