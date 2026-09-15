@@ -1,5 +1,6 @@
 # Problem Framing
 
+
 ## 1. Profil Domain Bisnis
 
 BPBD Kota Banda Aceh adalah instansi pemerintah daerah yang bertanggung jawab atas mitigasi
@@ -51,4 +52,4 @@ dipersonalisasi per lokasi warga dalam hitungan detik. Agen cerdas berbasis algo
 pencarian (search-based agent) dapat memodelkan jaringan jalur evakuasi sebagai graf berbobot
 dan secara otomatis menghitung rute teraman-tercepat dari titik bahaya ke shelter terdekat,
 memperbarui rekomendasi begitu ada perubahan kondisi jalur — sesuatu yang mustahil dilakukan
-secara manual oleh petugas dalam skala kota dan dalam waktu yang sangat terbatas.
+secara manual oleh petugas dalam skala kota dan dalam waktu yang sangat terbatas. 
