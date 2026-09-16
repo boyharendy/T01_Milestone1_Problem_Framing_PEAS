@@ -18,9 +18,9 @@ Repositori ini merupakan implementasi dan serahan Milestone 1 untuk perancangan 
 
 | Nama Anggota | NIM | Peran / Fokus Tanggung Jawab | Area Kontribusi Utama |
 | :--- | :---: | :--- | :--- |
-| *Nama Anggota 1* | *NIM Anggota 1* | **AI Solutions Architect & Business Analyst** | `docs/problem_framing.md`, `docs/peas_specification.md`, Laporan Bab 1 & 2 |
-| **Boy Harendy** | *NIM Anggota 2* | **Algorithm & Data Modeling Engineer** | `src/graph_model.py`, `src/search.py`, `src/heuristics.py`, Laporan Bab 3 |
-| *Nama Anggota 3* | *NIM Anggota 3* | **DevOps, QA & Documentation Lead** | Inisialisasi Astral `uv`, `tests/test_search.py`, `README.md`, Laporan Bab 4 & Kompilasi PDF |
+| *Artha Liebe Siregar* | *12S24010* | **AI Solutions Architect & Business Analyst** | `docs/problem_framing.md`, `docs/peas_specification.md`, Laporan Bab 1 & 2 |
+| **Boy Harendy** | *12S24016* | **Algorithm & Data Modeling Engineer** | `src/graph_model.py`, `src/search.py`, `src/heuristics.py`, Laporan Bab 3 |
+| *Dianita Lorensia Br Ginting* | *12S24044* | **DevOps, QA & Documentation Lead** | Inisialisasi Astral `uv`, `tests/test_search.py`, `README.md`, Laporan Bab 4 & Kompilasi PDF |
 
 ---
 
