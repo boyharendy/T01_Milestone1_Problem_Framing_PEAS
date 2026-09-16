@@ -331,21 +331,65 @@ def build_banda_aceh_graph() -> EvacuationGraph:
     return g
 
 
+def print_full_graph_data(graph: EvacuationGraph) -> None:
+    """Mencetak katalog lengkap seluruh data dummy graf evakuasi Banda Aceh.
+    
+    Menampilkan:
+    1. Tabel seluruh Simpul (Nodes) dengan koordinat, tipe, dan kapasitas.
+    2. Tabel seluruh Ruas Jalan (Edges) dengan jarak, risiko, kemacetan, dan biaya transisi.
+    3. Ringkasan statistik formal 5-tupel.
+    """
+    print("=" * 105)
+    print("       KATALOG LENGKAP DATA DUMMY GRAF JARINGAN EVAKUASI TSUNAMI BPBD KOTA BANDA ACEH")
+    print("=" * 105)
+
+    # 1. TABEL SIMPUL (NODES / STATE SPACE X)
+    print("\n[1] DAFTAR LENGKAP SIMPUL / TITIK LOKASI (STATE SPACE X)")
+    print("-" * 105)
+    print(f"{'No':<3} | {'ID Simpul':<26} | {'Tipe':<13} | {'Koordinat (km)':<16} | {'Kapasitas':<11} | {'Keterangan'}")
+    print("-" * 105)
+    
+    for idx, (node_id, node) in enumerate(graph.nodes.items(), start=1):
+        coord_str = f"({node.x:.1f}, {node.y:.1f})"
+        cap_str = f"{node.capacity:,} jiwa" if node.capacity else "-"
+        print(f"{idx:<3} | {node.id:<26} | {node.node_type:<13} | {coord_str:<16} | {cap_str:<11} | {node.name}")
+    print("-" * 105)
+
+    # 2. TABEL RUAS JALAN (EDGES)
+    print("\n[2] DAFTAR LENGKAP RUAS JALAN BERBOBOT (EDGES / TRANSITION & COST)")
+    print("-" * 105)
+    print(f"{'No':<3} | {'Asal (u)':<24} -> {'Tujuan (v)':<25} | {'Jarak':<7} | {'Risk':<5} | {'Cong':<5} | {'Biaya C(u,v)'}")
+    print("-" * 105)
+
+    seen_edges = set()
+    edge_idx = 1
+    for u, edges in graph.adjacency.items():
+        for edge in edges:
+            pair_key = tuple(sorted([edge.origin, edge.destination]))
+            # Cetak semua edge searah yang ada di adjacency list
+            print(
+                f"{edge_idx:<3} | {edge.origin:<24} -> {edge.destination:<25} | "
+                f"{edge.distance_km:>4.1f} km | {edge.risk_factor:>4.2f} | "
+                f"{edge.congestion_factor:>4.2f} | {edge.cost:>8.3f}"
+            )
+            edge_idx += 1
+    print("-" * 105)
+
+    # 3. RINGKASAN FORMAL & STATISTIK JARINGAN
+    total_shelter_cap = sum(n.capacity for n in graph.nodes.values() if n.capacity)
+    unique_segments = len(graph.adjacency) # total edges / 2 if symmetric
+    total_directed_edges = sum(len(edges) for edges in graph.adjacency.values())
+
+    print("\n[3] RINGKASAN FORMULASI 5-TUPEL & STATISTIK GRAF")
+    print(f" - Tupel 1 (State Space X)    : {len(graph.state_space)} titik lokasi geografis")
+    print(f" - Tupel 2 (Action Space A)   : MoveTo(v) melalui {total_directed_edges} transisi terarah ({total_directed_edges // 2} ruas jalan 2 arah)")
+    print(f" - Tupel 3 (Transition T)     : Deterministik T(u, MoveTo(v)) = v")
+    print(f" - Tupel 4 (Goal Test G)      : {len(graph.shelters)} Designated Shelters (Total Daya Tampung: {total_shelter_cap:,} jiwa)")
+    print(f" - Tupel 5 (Step Cost C)      : C(u, v) = Jarak x (1 + Risk) x (1 + Congestion)")
+    print("=" * 105)
+
+
 if __name__ == "__main__":
     graph = build_banda_aceh_graph()
-    print("=== MODEL GRAF EVAKUASI BPBD KOTA BANDA ACEH ===")
-    print(f"Total Simpul (X): {len(graph.state_space)} titik")
-    print(f"Total Shelter (G): {len(graph.shelters)} titik aman")
-    print("\nDaftar Shelter:")
-    for s in graph.shelters:
-        node = graph.nodes[s]
-        print(f" - [{node.id}] {node.name} (Kapasitas: {node.capacity} orang)")
-    
-    print("\nContoh Formulasi Transisi:")
-    start = "Ulee_Lheue"
-    actions = graph.get_actions(start)
-    print(f"Dari State: {start}")
-    print(f"Aksi Tersedia (A): {actions}")
-    for act in actions:
-        cost = graph.get_step_cost(start, act)
-        print(f" -> MoveTo({act}) => Biaya Transisi C({start}, {act}) = {cost:.3f}")
+    print_full_graph_data(graph)
+
