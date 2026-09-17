@@ -2,65 +2,54 @@
 
 ## 1. Performance Measure (P)
 
-1. Total waktu evakuasi dari titik bahaya ke shelter (dalam menit).
-2. Persentase warga yang berhasil mencapai shelter sebelum estimasi waktu tsunami tiba.
-3. Minimisasi jarak tempuh rute (meter/km).
-4. Minimisasi skor risiko kumulatif sepanjang rute (akumulasi bobot risiko jalur yang dilalui).
-5. Tingkat distribusi beban jalur (menghindari satu jalur menampung terlalu banyak orang sekaligus).
+1.	Total waktu evakuasi dari titik bahaya ke shelter (dalam menit).
+2.	Persentase warga yang berhasil mencapai shelter sebelum estimasi waktu tsunami tiba.
+3.	Minimisasi jarak tempuh rute (meter/km).
+4.	Minimisasi skor risiko kumulatif sepanjang rute (akumulasi bobot risiko jalur yang dilalui).
+5.	Tingkat distribusi beban jalur (menghindari satu jalur menampung terlalu banyak orang sekaligus).
 
 ## 2. Environment (E)
 
-1. Jaringan jalan/jalur evakuasi Kota Banda Aceh (dimodelkan sebagai graf).
-2. Sistem peringatan dini BMKG (waktu & estimasi kedatangan tsunami).
-3. Data kondisi infrastruktur jalur secara real-time (rusak/aman).
-4. Data kepadatan pejalan kaki/kendaraan per jalur.
-5. Lokasi dan kapasitas shelter/titik kumpul evakuasi.
+1.	Jaringan jalan/jalur evakuasi Kota Banda Aceh yang dimodelkan sebagai graf.
+2.	Sistem peringatan dini BMKG (waktu dan estimasi kedatangan tsunami).
+3.	Data kondisi infrastruktur jalur secara real-time (aman atau rusak).
+4.	Data kepadatan pejalan kaki dan kendaraan per jalur.
+5.	Lokasi serta kapasitas shelter atau titik kumpul evakuasi.
 
 ## 3. Actuators (A)
 
-1. Menampilkan rekomendasi rute evakuasi ke warga (lewat aplikasi/notifikasi).
-2. Melakukan reroute otomatis saat kondisi jalur berubah (rusak/padat).
-3. Menandai/memperbarui status suatu jalur sebagai "tidak aman" di sistem.
-4. Mengirim prioritas alert ke petugas lapangan di titik jalur kritis.
+1.	Menampilkan rekomendasi rute evakuasi kepada warga melalui aplikasi atau notifikasi.
+2.	Melakukan reroute otomatis saat kondisi jalur berubah, seperti rusak atau padat.
+3.	Menandai dan memperbarui status sebuah jalur sebagai “tidak aman” dalam sistem.
+4.	Mengirim prioritas alert ke petugas lapangan di titik jalur kritis.
+
 
 ## 4. Sensors (S)
 
-1. Lokasi awal/titik bahaya warga (GPS).
-2. Status kondisi jalur real-time (dari laporan lapangan/sensor IoT/BPBD).
-3. Data kepadatan lalu lintas per jalur.
-4. Estimasi waktu kedatangan tsunami (dari BMKG).
-5. Status okupansi/kapasitas shelter saat ini.
+1.	Lokasi awal atau titik bahaya warga (GPS).
+2.	Status kondisi jalur secara real-time (dari laporan lapangan, sensor IoT, atau BPBD).
+3.	Data kepadatan lalu lintas per jalur.
+4.	Estimasi waktu kedatangan tsunami dari BMKG.
+5.	Status okupansi atau kapasitas shelter saat ini.
+
 
 ## 5. Analisis Sifat Lingkungan Tugas
 
 ### Partially Observable (bukan Fully Observable)
-Agen tidak punya akses penuh ke seluruh kondisi kota secara real-time — status kerusakan
-jalur, kepadatan warga di titik tertentu, atau posisi pasti setiap individu tidak selalu
-tersedia secara instan/akurat. Agen bergantung pada sensor/laporan yang mungkin delay atau
-tidak lengkap.
+Agen tidak memiliki akses penuh terhadap seluruh kondisi kota secara real-time. Status kerusakan jalur, kepadatan warga di titik tertentu, atau posisi pasti setiap individu tidak selalu tersedia secara instan dan akurat. Oleh karena itu, agen bergantung pada sensor dan laporan yang mungkin mengalami keterlambatan atau ketidaklengkapan data.
 
 ### Stochastic (bukan Deterministic)
-Hasil dari suatu aksi tidak selalu pasti — misalnya rekomendasi rute yang diberikan bisa saja
-tidak dipatuhi warga, atau kondisi jalur bisa berubah tiba-tiba (longsor susulan, kemacetan
-mendadak) di luar prediksi model.
+Hasil dari suatu aksi tidak selalu pasti. Misalnya, rekomendasi rute yang diberikan mungkin tidak dipatuhi oleh warga, atau kondisi jalur dapat berubah secara tiba-tiba akibat longsor, kemacetan, atau gangguan lain di luar prediksi model.
 
 ### Sequential (bukan Episodic)
-Keputusan rute yang direkomendasikan di satu titik waktu memengaruhi kondisi (kepadatan,
-ketersediaan shelter) untuk keputusan berikutnya — misalnya jika terlalu banyak warga
-diarahkan ke satu jalur, itu memengaruhi rekomendasi untuk warga lain setelahnya. Keputusan
-agen tidak berdiri sendiri per instance.
+Keputusan rute yang direkomendasikan pada satu waktu akan memengaruhi kondisi berikutnya, seperti kepadatan jalur dan ketersediaan shelter. Dengan demikian, keputusan agen tidak berdiri sendiri, melainkan saling memengaruhi dalam rangkaian peristiwa yang berkelanjutan.
 
 ### Dynamic (bukan Static)
-Lingkungan terus berubah selama agen "berpikir" — kondisi jalur, kepadatan, dan waktu tersisa
-sebelum tsunami tiba terus bergerak, sehingga agen harus mempertimbangkan perubahan tersebut
-secara berkelanjutan, bukan mengasumsikan dunia diam.
+Lingkungan terus berubah selama agen bekerja. Kondisi jalur, kepadatan massa, dan waktu tersisa sebelum tsunami tiba bergerak secara dinamis, sehingga agen harus mempertimbangkan perubahan tersebut secara terus-menerus dan tidak boleh mengasumsikan bahwa dunia tetap diam.
 
 ### Discrete (bukan Continuous)
-Ruang state dimodelkan sebagai graf dengan node (titik/persimpangan/shelter) dan edge (segmen
-jalur) yang terbatas jumlahnya — bukan ruang koordinat kontinu tak terhingga. Aksi agen
-(memilih jalur berikutnya) juga berasal dari himpunan pilihan diskrit.
+Ruang keadaan dimodelkan sebagai graf dengan node yang mewakili titik, persimpangan, atau shelter, serta edge yang mewakili segmen jalur. Aksi yang dipilih agen juga berasal dari himpunan pilihan yang terbatas dan bersifat diskrit, bukan ruang koordinat kontinu secara tak terbatas.
 
 ### Multi-agent
-Terdapat banyak warga yang bergerak secara bersamaan dan saling memengaruhi (kepadatan jalur
-dipengaruhi keputusan kolektif banyak individu), serta interaksi dengan petugas lapangan BPBD
-yang juga mengambil tindakan di lingkungan yang sama.
+Terdapat banyak warga yang bergerak secara bersamaan dan saling memengaruhi. Kepadatan jalur dipengaruhi oleh keputusan kolektif banyak individu, sementara petugas lapangan BPBD juga mengambil tindakan dalam lingkungan yang sama. Oleh karena itu, tugas ini memiliki karakter multi-agent.
+
