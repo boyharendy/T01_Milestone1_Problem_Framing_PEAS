@@ -26,10 +26,4 @@ BPBD Kota Banda Aceh merupakan instansi pemerintah daerah yang bertanggung jawab
 
 ## 4. Justifikasi AI (Search-based Agent)
 
-Proses manual saat ini (sirene + peta statis) tidak mampu memproses secara simultan tiga
-variabel kritis — jarak, risiko jalur, dan kepadatan — untuk merekomendasikan rute yang
-dipersonalisasi per lokasi warga dalam hitungan detik. Agen cerdas berbasis algoritma
-pencarian (search-based agent) dapat memodelkan jaringan jalur evakuasi sebagai graf berbobot
-dan secara otomatis menghitung rute teraman-tercepat dari titik bahaya ke shelter terdekat,
-memperbarui rekomendasi begitu ada perubahan kondisi jalur — sesuatu yang mustahil dilakukan
-secara manual oleh petugas dalam skala kota dan dalam waktu yang sangat terbatas. 
+Proses evakuasi yang saat ini masih bergantung pada sirene dan peta statis tidak mampu memproses secara simultan tiga variabel kritis, yaitu jarak, risiko jalur, dan kepadatan massa, dalam hitungan detik. Oleh karena itu, diperlukan sebuah agen cerdas berbasis algoritma pencarian (search-based agent) yang dapat memodelkan jaringan jalur evakuasi sebagai graf berbobot dan menghitung rute paling aman dan paling cepat dari titik bahaya menuju shelter terdekat. Dengan pendekatan ini, rekomendasi dapat diperbarui secara dinamis sesuai perubahan kondisi jalur, sehingga proses evakuasi menjadi lebih efektif dan responsif dibandingkan pendekatan manual yang masih bersifat statis.
