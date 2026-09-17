@@ -1,186 +1,211 @@
-# Proyek Kecerdasan Buatan - Milestone 1
-> **Mata Kuliah:** 10S3001 - Kecerdasan Buatan (+P)  
-> **Institusi:** Institut Teknologi Del - Sarjana Sistem Informasi  
-> **Tugas:** Milestone 1 (W02) - *Business Problem Framing, Spesifikasi PEAS, & Inisialisasi Repositori GitHub*
+# Perancangan Sistem Rekomendasi Rute Evakuasi Tsunami Berbasis Agen Cerdas di BPBD Kota Banda Aceh
 
----
+Proyek ini memodelkan jaringan evakuasi tsunami Kota Banda Aceh sebagai graf berbobot dan menghasilkan rekomendasi rute menuju shelter terdekat berdasarkan biaya operasional. Sistem menyediakan implementasi Uniform Cost Search (UCS), A* Search, pengujian otomatis, serta visualisasi jaringan dan perbandingan kinerja algoritma.
 
-## 📌 Deskripsi Proyek
-Repositori ini merupakan implementasi dan serahan Milestone 1 untuk perancangan agen cerdas berbasis penelusuran status (*state-space search agent*) pada domain operasional bisnis nyata. Proyek ini mencakup:
-1. **Business Problem Framing:** Profil organisasi, analisis *pain points* operasional, serta justifikasi kebutuhan solusi berbasis AI.
-2. **Spesifikasi Formal PEAS:** Pemodelan kuantitatif *Performance Measure*, klasifikasi 6 dimensi *Environment*, daftar *Actuators*, dan instrumen *Sensors*.
-3. **Formulasi Ruang Keadaan & Algoritma Penelusuran:** Pemodelan 5-tupel $(X, A, T, G, C)$ dan implementasi algoritma pencarian optimal (*Uniform Cost Search* / *A\* Search*) dengan struktur data antrean prioritas berbasis `heapq`.
-4. **Standar Rekayasa Perangkat Lunak:** Manajemen dependensi modern menggunakan Astral `uv`, pengujian otomatis berbasis `pytest`, dan lisensi open-source MIT.
+## Latar Belakang (Background)
 
----
+Banda Aceh memiliki wilayah pesisir yang berisiko terhadap tsunami. Dalam situasi darurat, keputusan rute evakuasi perlu mempertimbangkan jarak, risiko jalur, kemacetan, kondisi jalan, serta ketersediaan shelter. Rute terpendek secara geografis belum tentu menjadi rute dengan biaya operasional dan risiko paling rendah.
 
-## 👥 Tim Pengembang & Distribusi Kontribusi
+Proyek ini dibuat sebagai prototipe agen cerdas untuk membantu proses rekomendasi rute evakuasi. Ruang masalah direpresentasikan sebagai graf yang berisi titik bahaya, persimpangan, dan shelter evakuasi. Setiap ruas jalan memiliki bobot biaya yang menggabungkan jarak fisik, faktor risiko, dan faktor kemacetan.
 
-| Nama Anggota | NIM | Peran / Fokus Tanggung Jawab | Area Kontribusi Utama |
-| :--- | :---: | :--- | :--- |
-| *Artha Liebe Siregar* | *12S24010* | **AI Solutions Architect & Business Analyst** | `docs/problem_framing.md`, `docs/peas_specification.md`, Laporan Bab 1 & 2 |
-| **Boy Harendy** | *12S24016* | **Algorithm & Data Modeling Engineer** | `src/graph_model.py`, `src/search.py`, `src/heuristics.py`, Laporan Bab 3 |
-| *Dianita Lorensia Br Ginting* | *12S24044* | **DevOps, QA & Documentation Lead** | Inisialisasi Astral `uv`, `tests/test_search.py`, `README.md`, Laporan Bab 4 & Kompilasi PDF |
+Tujuan utama sistem:
 
----
+- Menemukan rute dengan biaya total minimum dari titik bahaya menuju shelter.
+- Membandingkan UCS dan A* berdasarkan optimalitas dan jumlah simpul yang diekspansi.
+- Memvalidasi bahwa heuristik A* bersifat admissible dan konsisten pada model graf.
+- Menghasilkan visualisasi jaringan, skenario rute, dan benchmark untuk dokumentasi akademik.
 
-## 📋 Panduan Pengerjaan & Lokasi Berkas per Anggota
+Manfaat prototipe ini adalah menyediakan dasar teknis yang dapat dikembangkan menjadi sistem pendukung keputusan BPBD. Sistem belum menggantikan keputusan petugas lapangan dan belum terhubung ke sensor atau data operasional real-time.
 
-Agar pengerjaan teratur, bebas dari tabrakan file (*merge conflict*), dan kontribusi di GitHub tercatat seimbang oleh seluruh anggota (sesuai rubrik penilaian 30%), ikuti pembagian peran dan lokasi kerja berikut:
+## Arsitektur dan Penjelasan Kode (Code Explanation)
 
-### 🔵 1. Anggota 1: AI Solutions Architect & Business Analyst
-* **Fokus Tanggung Jawab:** Analisis domain bisnis nyata, formulasi *pain points*, perumusan matriks spesifikasi formal PEAS, dan karakteristik 6 dimensi lingkungan operasional.
-* **Berkas yang Dikerjakan:**
-  * 📄 `docs/problem_framing.md` : Profil organisasi/bisnis, alur proses *as-is*, analisis *pain points*, dan justifikasi AI.
-  * 📄 `docs/peas_specification.md` : Matriks PEAS kuantitatif & analisis 6 dimensi lingkungan operasional.
-  * 📑 **Laporan PDF:** Bab 1 (*Problem Framing*) & Bab 2 (*Spesifikasi Agen PEAS*).
-* **Perintah Commit Bertahap:**
-  ```bash
-  git pull origin main
-  # Kerjakan problem framing
-  git add docs/problem_framing.md
-  git commit -m "docs(framing): tambahkan profil bisnis dan analisis pain points"
-  git push origin main
-
-  # Kerjakan spesifikasi PEAS
-  git add docs/peas_specification.md
-  git commit -m "docs(peas): rumuskan matriks formal PEAS dan 6 dimensi lingkungan"
-  git push origin main
-  ```
-
----
-
-### 🟢 2. Anggota 2 (Boy Harendy): Algorithm & Data Modeling Engineer
-* **Fokus Tanggung Jawab:** Formulasi matematis ruang keadaan $(X, A, T, G, C)$, pemodelan graf keputusan bisnis berbobot riil, dan implementasi algoritma penelusuran optimal berbasis modul `heapq`.
-* **Berkas yang Dikerjakan:**
-  * 🐍 `src/graph_model.py` : Pemodelan matematis 5-tupel $(X, A, T, G, C)$ dan struktur data graf (adjacency list & edge weights).
-  * 🐍 `src/search.py` : Engine algoritma Uniform Cost Search (UCS) atau A* Search menggunakan `heapq`.
-  * 🐍 `src/heuristics.py` : Fungsi heuristik $h(n)$ yang terbukti *admissible* ($h(n) \le h^*(n)$) jika memakai A*.
-  * 📑 **Laporan PDF:** Bab 3 (*Formulasi Ruang Keadaan & Algoritma Penelusuran*).
-* **Perintah Commit Bertahap:**
-  ```bash
-  git pull origin main
-  # Kerjakan pemodelan graf
-  git add src/graph_model.py
-  git commit -m "feat(graph): inisialisasi pemodelan ruang keadaan dan graf alur bisnis"
-  git push origin main
-
-  # Kerjakan modul pencarian
-  git add src/search.py src/heuristics.py
-  git commit -m "feat(search): implementasi algoritma penelusuran optimal berbasis heapq"
-  git push origin main
-  ```
-
----
-
-### 🟣 3. Anggota 3: DevOps, QA & Documentation Lead
-* **Fokus Tanggung Jawab:** Konfigurasi lingkungan Astral `uv`, pengujian otomatis (*unit testing*) dengan `pytest`, penyusunan diagram arsitektur, dokumentasi `README.md`, dan kompilasi laporan serahan akhir.
-* **Berkas yang Dikerjakan:**
-  * ⚙️ `pyproject.toml`, `uv.lock`, `.gitignore`, `LICENSE` : Setup dependensi dan lisensi.
-  * 🧪 `tests/test_search.py` : Kasus uji unit testing dengan `pytest` (jalur optimal, penanganan siklus/graf terputus, validasi `heapq`).
-  * 📘 `README.md` : Dokumentasi repositori, panduan eksekusi, dan diagram alur sistem.
-  * 📑 **Laporan PDF:** Halaman Judul/Cover, Bab 4 (*Standar Repositori & Hasil Uji*), serta ekspor akhir `Grup{Kode}-Tugas01.pdf`.
-* **Perintah Commit Bertahap:**
-  ```bash
-  git pull origin main
-  # Kerjakan pengujian unit testing
-  git add tests/test_search.py
-  git commit -m "test(search): tambahkan unit testing pytest untuk validasi algoritma"
-  git push origin main
-
-  # Perbarui dokumentasi repo
-  git add README.md
-  git commit -m "docs(readme): lengkapi dokumentasi proyek dan diagram alur sistem"
-  git push origin main
-  ```
-
----
-
-### ⚠️ Aturan Emas Kolaborasi Tim (Mencegah Merge Conflict)
-1. **Wajib `git pull origin main`:** Selalu ambil pembaruan terbaru sebelum mulai mengedit atau sebelum melakukan `git push`.
-2. **Hanya `git add` Berkas Milik Sendiri:** Jangan gunakan `git add .` sembarangan! Tambahkan hanya berkas yang menjadi area tanggung jawab masing-masing (contoh: `git add docs/...` atau `git add src/...`).
-3. **Commit dari Akun Masing-Masing:** Seluruh 3 anggota wajib melakukan commit dan push dari laptop dan akun GitHub masing-masing agar statistik di menu **Insights → Contributors** tercatat seimbang dan dinilai penuh oleh dosen.
-
-
-## 🏗️ Struktur Repositori
+### Struktur Proyek
 
 ```text
-certan-milestone-1/
-├── .github/                    # Konfigurasi GitHub & workflow
-├── docs/                       # Dokumentasi analisis bisnis & spesifikasi PEAS
-│   ├── problem_framing.md      # [Anggota 1] Profil bisnis, alur proses, pain points
-│   └── peas_specification.md   # [Anggota 1] Matriks PEAS & 6 dimensi lingkungan operasional
-├── src/                        # Kode sumber algoritma & pemodelan graf
-│   ├── __init__.py             # [Anggota 2] Inisialisasi package Python
-│   ├── graph_model.py          # [Anggota 2] Formulasi X, A, T, G, C & struktur graf bisnis
-│   ├── search.py               # [Anggota 2] Engine penelusuran optimal (heapq UCS / A*)
-│   └── heuristics.py           # [Anggota 2] Fungsi heuristik admissible & konsisten
-├── tests/                      # Pengujian otomatis (Unit Testing)
-│   ├── __init__.py             # [Anggota 3] Inisialisasi package tests
-│   └── test_search.py          # [Anggota 3] Test cases pytest untuk validasi algoritma
-├── .gitignore                  # Berkas yang diabaikan git
-├── .python-version             # Versi Python yang dipin (Python 3.11+)
-├── LICENSE                     # Lisensi open-source (MIT License)
-├── pyproject.toml              # Definisi proyek & dependensi modern via Astral uv
-├── uv.lock                     # Lockfile deterministik untuk dependensi
-└── README.md                   # Dokumentasi utama proyek
+T01_Milestone1_Problem_Framing_PEAS/
+├── docs/
+│   ├── peas_specification.md       # Matriks PEAS dan karakteristik lingkungan
+│   └── problem_framing.md          # Konteks bisnis dan analisis masalah
+├── output/                         # PNG hasil visualisasi
+├── src/
+│   ├── graph_model.py              # Model node, edge, dan graf evakuasi
+│   ├── heuristics.py               # Heuristik Euclidean untuk A*
+│   ├── search.py                   # UCS, A*, dan benchmark rute
+│   └── visualize.py                # Pembuatan peta dan grafik kinerja
+├── tests/
+│   └── test_search.py              # Pengujian model, heuristik, dan algoritma
+├── pyproject.toml                  # Metadata proyek dan dependensi
+├── uv.lock                         # Versi dependensi yang terkunci
+├── run_ai.py                       # Demo layanan AI opsional
+└── README.md
 ```
 
----
+### Model Ruang Keadaan
 
-## 🏛️ Arsitektur Alur Agen Cerdas
+`EvacuationGraph` menyediakan antarmuka formal lima komponen ruang keadaan:
 
-```mermaid
-graph TD
-    subgraph Lingkungan [Lingkungan Operasional Bisnis]
-        S1[Status & Pesanan] -->|Persepsi Sensor| Sensor[Sensors: Data Ingestion]
-        Actuator[Actuators: Dispatch / Eksekusi Jalur] -->|Aksi Nyata| S1
-    end
+| Komponen | Implementasi | Keterangan |
+| --- | --- | --- |
+| `X` | `state_space` | Seluruh ID node yang terdaftar pada graf |
+| `A` | `get_actions(state)` | Node tetangga yang dapat dicapai dari state saat ini |
+| `T` | `transition(state, action)` | Transisi deterministik menuju node tujuan |
+| `G` | `is_goal(state)` | True apabila state merupakan shelter |
+| `C` | `get_step_cost(origin, destination)` | Biaya perpindahan pada satu ruas jalan |
 
-    subgraph AgenCerdas [Agen Cerdas Penelusuran Ruang Keadaan]
-        Sensor --> StateMapper[Formulasi State Space X & Biaya C]
-        StateMapper --> SearchEngine["Search Engine (heapq Priority Queue)<br>Uniform Cost Search / A* Search"]
-        HeuristicModel["Heuristic Function h(n)<br>(Admissible & Consistent)"] -.->|Estimasi Biaya Sisa| SearchEngine
-        GraphModel[(Graf Alur Transisi Bisnis T)] --> SearchEngine
-        SearchEngine --> PathOptimizer[Jalur Keputusan Optimal & Biaya Minimal]
-        PathOptimizer --> Actuator
-    end
+Node menyimpan koordinat lokal, tipe lokasi, kapasitas shelter, dan deskripsi. Edge menyimpan jarak, faktor risiko, faktor kemacetan, dan status dapat dilalui. Biaya satu langkah dihitung dengan rumus:
+
+```text
+C(u, v) = distance_km * (1 + risk_factor) * (1 + congestion_factor)
 ```
 
----
+Edge yang tidak dapat dilalui memiliki biaya tak hingga dan tidak dikembalikan sebagai aksi valid.
 
-## 🚀 Panduan Instalasi & Menjalankan Proyek
+### Algoritma Pencarian
 
-Proyek ini menggunakan manajer paket modern **[Astral uv](https://docs.astral.sh/uv/)** untuk eksekusi yang cepat, terisolasi, dan deterministik.
+`src/search.py` menggunakan `heapq` sebagai priority queue.
 
-### 1. Prasyarat
-- Git terpasang di sistem
-- Astral `uv` terpasang (Instalasi cepat: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"` di Windows atau `curl -LsSf https://astral.sh/uv/install.sh | sh` di Linux/macOS)
+- **UCS** memilih node dengan akumulasi biaya `g(n)` paling kecil. Pada graf dengan bobot positif, algoritma ini menjamin rute optimal.
+- **A*** memilih node berdasarkan `f(n) = g(n) + h(n)`, dengan `g(n)` sebagai biaya aktual dan `h(n)` sebagai estimasi menuju shelter.
+- `closest_shelter_heuristic` menggunakan jarak Euclidean minimum dari node ke shelter terdekat. Karena biaya ruas tidak lebih kecil daripada jarak fisik, heuristik ini digunakan sebagai lower bound.
+- `SearchResult` mengembalikan rute, shelter tujuan, biaya total, jumlah node yang diekspansi, urutan ekspansi, dan waktu eksekusi.
 
-### 2. Kloning Repositori
-```bash
+Implementasi menggunakan pemeriksaan biaya terbaik (`best_costs` atau `best_g_costs`) untuk melewati entri priority queue yang sudah tidak optimal. Counter tambahan digunakan sebagai tie-breaker agar entri dengan prioritas sama tetap dapat diurutkan secara deterministik.
+
+### Alur Eksekusi
+
+1. `build_banda_aceh_graph()` membuat node, shelter, dan edge jaringan evakuasi.
+2. Algoritma menerima ID titik awal, misalnya `Ulee_Lheue`.
+3. Priority queue diinisialisasi dengan titik awal dan biaya nol.
+4. Node dengan prioritas terbaik dikeluarkan dan diuji sebagai goal.
+5. Tetangga yang dapat dilalui diekspansi, lalu biaya dan path terbaik diperbarui.
+6. Proses berhenti saat shelter pertama dikeluarkan dari queue atau queue kosong.
+7. Hasil dikemas sebagai `SearchResult` dan ditampilkan dalam format ringkasan.
+8. Modul visualisasi menggunakan hasil UCS dan A* untuk menghasilkan tiga file PNG.
+
+Tidak terdapat threading, IPC, atau sinkronisasi antarproses. Eksekusi bersifat sinkron dan deterministik terhadap data graf yang digunakan, sedangkan waktu eksekusi dapat berubah antar-run karena dipengaruhi kondisi mesin.
+
+## Prasyarat dan Cara Menjalankan (Getting Started)
+
+### Prasyarat Sistem
+
+- Windows, Linux, atau macOS.
+- Python 3.11 atau lebih baru.
+- Git.
+- `uv` untuk membuat environment dan memasang dependensi.
+- Ruang disk yang cukup untuk environment Python dan dependensi Matplotlib.
+
+Instalasi `uv` pada Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+### Instalasi Proyek
+
+```powershell
 git clone https://github.com/boyharendy/T01_Milestone1_Problem_Framing_PEAS.git
 cd T01_Milestone1_Problem_Framing_PEAS
-```
-
-### 3. Sinkronisasi Virtual Environment & Dependensi
-Cukup jalankan perintah berikut untuk mengunduh dan menyiapkan virtual environment otomatis:
-```bash
 uv sync
 ```
 
-### 4. Menjalankan Algoritma Penelusuran
-```bash
+`uv sync` membuat atau memperbarui `.venv` dan memasang dependensi berdasarkan `pyproject.toml` serta `uv.lock`.
+
+### Menjalankan Rekomendasi Rute
+
+```powershell
 uv run python -m src.search
 ```
 
-### 5. Menjalankan Pengujian Unit (*Pytest*)
-Untuk memvalidasi kebenaran algoritma, ketiadaan siklus, dan optimalitas biaya:
-```bash
+Perintah tersebut menjalankan empat skenario titik bahaya: `Ulee_Lheue`, `Lampulo`, `Peunayong`, dan `Cut_Mutia`, kemudian membandingkan UCS dengan A*.
+
+Alternatif untuk menjalankan file secara langsung:
+
+```powershell
+uv run python src/search.py
+```
+
+### Menghasilkan Visualisasi
+
+```powershell
+uv run python -m src.visualize
+```
+
+Perintah tersebut membuat atau memperbarui:
+
+- `output/peta_jaringan_evakuasi.png`
+- `output/skenario_rute_evakuasi.png`
+- `output/perbandingan_kinerja_ucs_vs_astar.png`
+
+### Menjalankan Pengujian
+
+```powershell
 uv run pytest -v
 ```
 
----
+Pengujian mencakup model graf, rumus biaya, goal test, admissibility dan konsistensi heuristik, optimalitas UCS dan A*, kasus titik awal yang sudah menjadi shelter, serta node terisolasi.
 
-## 📄 Lisensi
-Didistribusikan di bawah lisensi MIT. Lihat berkas [LICENSE](LICENSE) untuk informasi lebih lanjut.
+### Menjalankan Demo Layanan AI Opsional
+
+```powershell
+uv run python run_ai.py
+```
+
+Demo dapat berjalan dalam mode tanpa API key. Untuk mode Gemini, buat file `.env` berdasarkan `.env.example` dan isi API key sesuai konfigurasi layanan yang digunakan. API key tidak boleh di-commit ke repository.
+
+## Hasil Eksekusi (Results)
+
+Contoh hasil pengujian:
+
+```text
+============================= test session starts =============================
+collected 13 items
+
+tests/test_search.py::TestGraphModel::test_state_space_and_shelters PASSED
+tests/test_search.py::TestHeuristics::test_heuristic_admissibility_all_nodes PASSED
+tests/test_search.py::TestSearchAlgorithms::test_search_optimality_and_equivalence[Ulee_Lheue] PASSED
+...
+tests/test_search.py::TestSearchAlgorithms::test_edge_case_isolated_node PASSED
+
+============================= 13 passed in 0.23s ================================
+```
+
+Setiap `PASSED` menunjukkan satu skenario valid. Pengujian optimalitas memastikan biaya rute UCS dan A* setara, sedangkan pengujian heuristik memastikan nilai estimasi tidak melebihi biaya optimal pada graf uji.
+
+Contoh ringkasan keluaran pencarian:
+
+```text
+[A* Search (A-Star)] Ulee_Lheue -> Escape_Building_Lambung
+  - Rute Evakuasi      : Ulee_Lheue -> Lambung_Junction -> Escape_Building_Lambung
+  - Total Biaya Riil   : 3.8400
+  - Simpul Diekspansi  : 4 simpul
+  - Waktu Eksekusi     : 0.0xx ms
+```
+
+Biaya total adalah akumulasi biaya operasional setiap edge, bukan jarak fisik semata. Jumlah simpul yang diekspansi digunakan untuk membandingkan efisiensi pencarian; waktu eksekusi bersifat informatif dan dapat berbeda pada setiap komputer.
+
+Visualisasi menyajikan node bahaya, persimpangan, shelter, edge jaringan, rute A*, dan perbandingan jumlah ekspansi UCS terhadap A*. File PNG pada `output/` dapat digunakan dalam laporan atau presentasi.
+
+## Analisis dan Evaluasi (Review and Future Improvements)
+
+### Evaluasi Implementasi Saat Ini
+
+- **Optimalitas:** UCS menghasilkan rute minimum berdasarkan biaya edge positif. A* menghasilkan biaya yang sama dengan UCS pada pengujian karena menggunakan heuristik admissible.
+- **Efisiensi:** A* dapat mengurangi jumlah node yang diekspansi karena prioritasnya diarahkan oleh estimasi jarak ke shelter. Keuntungan aktual bergantung pada bentuk graf dan kualitas heuristik.
+- **Kompleksitas:** Dengan priority queue, proses pencarian secara umum memiliki biaya sekitar `O((V + E) log V)` untuk graf berbobot, dengan `V` sebagai jumlah node dan `E` sebagai jumlah edge. Penyimpanan path pada setiap entri queue meningkatkan penggunaan memori dibandingkan menyimpan predecessor saja.
+- **Keterbatasan data:** Graf dan bobot saat ini merupakan data pemodelan statis. Sistem belum menerima GPS warga, laporan kerusakan, kepadatan lalu lintas, peringatan BMKG, atau okupansi shelter secara real-time.
+- **Keterbatasan model:** Faktor risiko dan kemacetan dirangkum dalam bobot sederhana. Kapasitas shelter belum menjadi constraint pencarian dan belum ada optimasi distribusi banyak kelompok warga.
+- **Keterbatasan validasi:** Test suite memvalidasi algoritma dan model, tetapi belum menguji integrasi dengan API eksternal, ketahanan terhadap data sensor yang tidak lengkap, atau performa pada graf skala kota yang besar.
+
+### Pengembangan Berikutnya
+
+1. Integrasikan sumber data real-time untuk status jalan, kepadatan, peringatan tsunami, dan kapasitas shelter.
+2. Tambahkan validasi skema input serta penanganan data sensor yang hilang, terlambat, atau tidak konsisten.
+3. Gunakan predecessor map untuk mengurangi duplikasi penyimpanan path pada priority queue.
+4. Tambahkan constraint kapasitas shelter dan model multi-agent untuk mencegah penumpukan warga pada satu rute.
+5. Kembangkan API atau antarmuka peta untuk menampilkan rekomendasi berdasarkan lokasi GPS pengguna.
+6. Tambahkan benchmark pada graf yang lebih besar serta continuous integration untuk menjalankan test otomatis pada setiap pull request.
+7. Kalibrasikan bobot risiko dan kemacetan menggunakan data historis BPBD agar biaya rute lebih representatif.
+
+## Lisensi
+
+Proyek ini didistribusikan berdasarkan lisensi MIT. Lihat file [LICENSE](LICENSE) untuk detail selengkapnya.
