@@ -31,3 +31,5 @@ Thumbs.db
 .env.local
 *.env
 
+#supaya peta yang besar tidak ikut ter-commit
+data/*.graphml
