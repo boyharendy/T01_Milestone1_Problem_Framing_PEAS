@@ -8,7 +8,7 @@ BPBD Kota Banda Aceh merupakan instansi pemerintah daerah yang bertanggung jawab
 
 ## 2. Alur Proses Saat Ini (As-Is)
 
-1.	Sensor gempa dari BMKG atau lembaga terkait mendeteksi potensi tsunami, lalu BPBD Kota Banda Aceh menerima peringatan dini.
+1.	Sensor gempa     dari BMKG atau lembaga terkait mendeteksi potensi tsunami, lalu BPBD Kota Banda Aceh menerima peringatan dini.
 2.	Petugas BPBD mengaktifkan sirene peringatan dini di titik-titik strategis di kota.
 3.	Warga merujuk pada peta evakuasi statis per sektor untuk menentukan arah evakuasi menuju shelter atau dataran tinggi terdekat.
 4.	Peta evakuasi yang digunakan masih bersifat statis dan seragam untuk semua kondisi, sehingga belum dapat menyesuaikan rekomendasi rute secara real-time berdasarkan kondisi yang berubah, seperti jalur yang rusak, kepadatan massa, atau hambatan lalu lintas.
