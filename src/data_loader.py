@@ -17,6 +17,7 @@ Catatan penting:
 """
 from __future__ import annotations
 
+import itertools
 import json
 import logging
 import math
@@ -42,8 +43,13 @@ GRAPH_CACHE = DATA_DIR / "banda_aceh_drive.graphml"
 MATRIX_CACHE = DATA_DIR / "distance_matrix.json"
 
 # Pusat area unduhan graf (sekitar Masjid Raya Baiturrahman) dan radius (meter).
+GRAPH_META = DATA_DIR / "banda_aceh_drive.meta.json"
+
+# Area unduhan bawaan. get_distance_matrix() menghitung area sendiri dari semua titik.
 MAP_CENTER = (5.5550, 95.3200)
-MAP_RADIUS_M = 9000
+MAP_RADIUS_M = 13000
+MAP_PADDING_M = 3000      # jarak tambahan di luar titik terjauh
+MIN_SEPARATION_M = 100    # titik lebih dekat dari ini dianggap mencurigakan
 
 # Batas aman waktu tempuh (menit) - golden time tsunami, dipakai sebagai constraint GA.
 TSUNAMI_LIMIT_MIN = 20.0
@@ -73,17 +79,15 @@ DANGER_POINTS: tuple[Location, ...] = (
     Location("Ulee_Lheue", "Ulee Lheue", 5.55596, 95.28432, "danger", 400), 
     Location("Peunayong", "Peunayong", 5.56050, 95.31893, "danger", 500),
     Location("Cut_Mutia", "Cut Mutia", 5.55830, 95.31801, "danger", 300),
-    Location("Gampong_Pande", "Gampong Pande", 5.59180, 95.31241, "danger", 250),
+    Location("Gampong_Pande", "Gampong Pande", 5.58136, 95.31491, "danger", 250),
 )
 SHELTERS: tuple[Location, ...] = (
     # ID & kapasitas mengikuti build_banda_aceh_graph() Milestone 1; koordinat = PLACEHOLDER.
     Location("Escape_Building_Lambung", "Gedung Evakuasi Tsunami (TES) Lambung", 5.53519, 95.28252, "shelter", 1200),
-    Location("Escape_Building_Alue_Deah", "Gedung Evakuasi Tsunami Alue Deah Teungoh", 5.53520, 95.28250, "shelter", 1000),
+    Location("Escape_Building_Alue_Deah", "Gedung Evakuasi Tsunami Alue Deah Teungoh", 5.57000, 95.29500, "shelter", 1000),
     Location("Museum_Tsunami", "Museum Tsunami Banda Aceh", 5.54802, 95.31528, "shelter", 3500),
-    Location("Dataran_Tinggi_Mata_Ie", "Dataran Tinggi Perbukitan Mata Ie", 5.57096, 95.22603, "shelter", 20000),
+    Location("Dataran_Tinggi_Mata_Ie", "Gampong Mata Ie (Montasik)", 5.4725702, 95.3925207, "shelter", 20000),
 )
-
-
 @dataclass
 class DistanceData:
     """Hasil perhitungan matriks jarak/waktu tempuh riil."""
@@ -153,24 +157,60 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * r * math.asin(math.sqrt(a))
 
 
+def compute_map_area(locations: Sequence[Location], padding_m: float = MAP_PADDING_M) -> tuple[tuple[float, float], int]:
+    """Pusat & radius (meter, dibulatkan ke atas per 500) yang mencakup semua titik + padding."""
+    lats = [loc.lat for loc in locations]
+    lons = [loc.lon for loc in locations]
+    center = ((min(lats) + max(lats)) / 2, (min(lons) + max(lons)) / 2)
+    farthest = max(haversine_m(center[0], center[1], loc.lat, loc.lon) for loc in locations)
+    return center, int(math.ceil((farthest + padding_m) / 500.0) * 500)
+
+
+def validate_locations(dangers: Sequence[Location], shelters: Sequence[Location]) -> None:
+    """Tolak ID ganda; beri peringatan bila dua titik nyaris di koordinat yang sama."""
+    everything = [*dangers, *shelters]
+    ids = [loc.id for loc in everything]
+    duplicates = sorted({i for i in ids if ids.count(i) > 1})
+    if duplicates:
+        raise ValueError(f"ID lokasi ganda: {duplicates}")
+    for a, b in itertools.combinations(everything, 2):
+        gap = haversine_m(a.lat, a.lon, b.lat, b.lon)
+        if gap < MIN_SEPARATION_M:
+            logger.warning("%s dan %s hanya berjarak %.0f m - kemungkinan salah koordinat!", a.id, b.id, gap)
+
+
+def _cache_covers(center: tuple[float, float], radius_m: float) -> bool:
+    """True bila graf di cache mencakup area (center, radius_m) yang diminta."""
+    if not (GRAPH_CACHE.exists() and GRAPH_META.exists()):
+        return False
+    try:
+        meta = json.loads(GRAPH_META.read_text(encoding="utf-8"))
+        shift = haversine_m(center[0], center[1], meta["center"][0], meta["center"][1])
+        return shift + radius_m <= float(meta["radius_m"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
 def load_road_graph(use_cache: bool = True, center: tuple[float, float] = MAP_CENTER,
                     radius_m: int = MAP_RADIUS_M) -> nx.MultiDiGraph:
     """Unduh (atau muat dari cache) graf jalan Banda Aceh via OSMnx.
 
+    Cache dipakai hanya jika areanya mencakup area yang diminta; jika tidak, peta diunduh ulang.
     Setiap edge diberi atribut `speed_kph` dan `travel_time` (detik).
     """
     import osmnx as ox  # import lokal: modul tetap bisa diimpor tanpa osmnx
 
-    if use_cache and GRAPH_CACHE.exists():
+    if use_cache and _cache_covers(center, radius_m):
         logger.info("Memuat graf dari cache %s", GRAPH_CACHE)
         return ox.load_graphml(GRAPH_CACHE)
 
-    logger.info("Mengunduh graf jalan Banda Aceh dari OpenStreetMap ...")
+    logger.info("Mengunduh graf jalan dari OpenStreetMap (pusat=%s, radius=%d m) ...", center, radius_m)
     graph = ox.graph_from_point(center, dist=radius_m, network_type="drive", simplify=True)
     graph = ox.routing.add_edge_speeds(graph)
     graph = ox.routing.add_edge_travel_times(graph)
     GRAPH_CACHE.parent.mkdir(parents=True, exist_ok=True)
     ox.save_graphml(graph, GRAPH_CACHE)
+    GRAPH_META.write_text(json.dumps({"center": list(center), "radius_m": radius_m}), encoding="utf-8")
     return graph
 
 
@@ -240,12 +280,14 @@ def get_distance_matrix(
     if congestion_factor < 1.0:
         raise ValueError("congestion_factor harus >= 1.0")
     closures = list(closures)
+    validate_locations(dangers, shelters)
     danger_ids = [d.id for d in dangers]
     shelter_ids = [s.id for s in shelters]
 
     if graph is None:
         try:
-            graph = load_road_graph(use_cache=use_cache)
+            center, radius_m = compute_map_area([*dangers, *shelters])
+            graph = load_road_graph(use_cache=use_cache, center=center, radius_m=radius_m)
         except Exception as exc:  # jaringan/Overpass/osmnx belum terpasang
             if not allow_fallback:
                 raise

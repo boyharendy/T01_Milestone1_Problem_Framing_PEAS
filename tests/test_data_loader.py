@@ -11,8 +11,8 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from src.data_loader import (DANGER_POINTS, SHELTERS, DistanceData, get_distance_matrix,
-                             haversine_m)
+from src.data_loader import (DANGER_POINTS, MIN_SEPARATION_M, SHELTERS, DistanceData, Location,
+                             compute_map_area, get_distance_matrix, haversine_m, validate_locations)
 from src.visualize_map import plot_assignments, plot_truck_routes
 
 
@@ -93,3 +93,28 @@ def test_plots_create_files(tmp_path):
     plan = {"Truk_1": ([DANGER_POINTS[0].id, DANGER_POINTS[1].id], SHELTERS[1].id)}
     out2 = plot_truck_routes(data, plan, save_path=tmp_path / "b.png")
     assert out1.stat().st_size > 0 and out2.stat().st_size > 0
+
+def test_map_area_covers_every_location():
+    everything = [*DANGER_POINTS, *SHELTERS]
+    center, radius = compute_map_area(everything)
+    assert all(haversine_m(center[0], center[1], p.lat, p.lon) < radius for p in everything)
+
+
+def test_default_locations_are_not_overlapping():
+    everything = [*DANGER_POINTS, *SHELTERS]
+    for i, a in enumerate(everything):
+        for b in everything[i + 1:]:
+            assert haversine_m(a.lat, a.lon, b.lat, b.lon) >= MIN_SEPARATION_M, (a.id, b.id)
+
+
+def test_validate_rejects_duplicate_ids():
+    with pytest.raises(ValueError):
+        validate_locations(DANGER_POINTS, (*SHELTERS, SHELTERS[0]))
+
+
+def test_validate_warns_when_points_overlap(caplog):
+    twin_a = Location("A", "A", 5.5, 95.3, "shelter", 10)
+    twin_b = Location("B", "B", 5.50001, 95.3, "shelter", 10)
+    with caplog.at_level("WARNING"):
+        validate_locations((), (twin_a, twin_b))
+    assert "salah koordinat" in caplog.text
