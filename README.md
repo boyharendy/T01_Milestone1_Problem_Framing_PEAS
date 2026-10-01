@@ -1,6 +1,14 @@
-# Perancangan Sistem Rekomendasi Rute Evakuasi Tsunami Berbasis Agen Cerdas di BPBD Kota Banda Aceh
+# Perancangan Sistem Rekomendasi Rute dan Alokasi Armada Evakuasi Tsunami Berbasis Agen Cerdas di BPBD Kota Banda Aceh
 
-Proyek ini memodelkan jaringan evakuasi tsunami Kota Banda Aceh sebagai graf berbobot dan menghasilkan rekomendasi rute menuju shelter terdekat berdasarkan biaya operasional. Sistem menyediakan implementasi Uniform Cost Search (UCS), A* Search, pengujian otomatis, serta visualisasi jaringan dan perbandingan kinerja algoritma.
+Repositori ini mengembangkan prototipe sistem pendukung keputusan evakuasi tsunami untuk BPBD Kota Banda Aceh. Milestone 1 memodelkan jaringan evakuasi sebagai graf dan membandingkan Uniform Cost Search (UCS) dengan A*; Milestone 2 menambahkan Genetic Algorithm (GA) untuk menguji alokasi titik bahaya kepada armada dan shelter berdasarkan matriks waktu tempuh.
+
+## Tim Pengembang
+
+| NIM | Nama | Tanggung jawab utama |
+| --- | --- | --- |
+| 12S24010 | Artha Liebe Siregar | Integrasi data spasial dan visualisasi peta |
+| 12S24016 | Boy Harendy Simamora | Model graf, pencarian, dan solver GA |
+| 12S24044 | Dianita Lorensia Br Ginting | Pengujian, benchmark, dokumentasi, dan laporan |
 
 ## Latar Belakang (Background)
 
@@ -8,14 +16,25 @@ Banda Aceh memiliki wilayah pesisir yang berisiko terhadap tsunami. Dalam situas
 
 Proyek ini dibuat sebagai prototipe agen cerdas untuk membantu proses rekomendasi rute evakuasi. Ruang masalah direpresentasikan sebagai graf yang berisi titik bahaya, persimpangan, dan shelter evakuasi. Setiap ruas jalan memiliki bobot biaya yang menggabungkan jarak fisik, faktor risiko, dan faktor kemacetan.
 
-Tujuan utama sistem:
+Tujuan proyek:
 
-- Menemukan rute dengan biaya total minimum dari titik bahaya menuju shelter.
-- Membandingkan UCS dan A* berdasarkan optimalitas dan jumlah simpul yang diekspansi.
-- Memvalidasi bahwa heuristik A* bersifat admissible dan konsisten pada model graf.
-- Menghasilkan visualisasi jaringan, skenario rute, dan benchmark untuk dokumentasi akademik.
+- Menemukan rute berbiaya minimum pada model graf Milestone 1.
+- Menguji alokasi titik bahaya ke armada dan shelter dengan batas kapasitas serta waktu.
+- Membandingkan UCS dan A* serta mengukur waktu dan konvergensi GA.
+- Menyediakan test otomatis dan visualisasi sebagai bukti evaluasi prototipe.
 
-Manfaat prototipe ini adalah menyediakan dasar teknis yang dapat dikembangkan menjadi sistem pendukung keputusan BPBD. Sistem belum menggantikan keputusan petugas lapangan dan belum terhubung ke sensor atau data operasional real-time.
+Hasil proyek merupakan prototipe akademik, bukan rekomendasi operasional siap pakai. Sistem belum terhubung dengan feed real-time BPBD/BMKG, GPS warga, sensor lalu lintas, atau status okupansi shelter.
+
+## Ringkasan Model PEAS
+
+| Unsur | Ringkasan |
+| --- | --- |
+| **Ukuran kinerja** | Waktu dan jarak evakuasi, risiko jalur, ketepatan waktu mencapai shelter, dan distribusi beban. |
+| **Lingkungan** | Jaringan jalan Banda Aceh, titik bahaya, kondisi jalur, kepadatan, peringatan tsunami, dan shelter. |
+| **Aktuator** | Menampilkan rute, memperbarui rekomendasi, menandai jalur tidak aman, dan memberi peringatan kepada petugas. |
+| **Sensor** | Lokasi/GPS, laporan kondisi jalan, kepadatan, informasi BMKG, dan kapasitas atau okupansi shelter. |
+
+Lingkungan operasional yang dituju bersifat partially observable, stochastic, sequential, dynamic, discrete, dan multi-agent. Implementasi yang tersedia belum mengakses semua sensor tersebut secara langsung.
 
 ## Arsitektur dan Penjelasan Kode (Code Explanation)
 
@@ -25,15 +44,29 @@ Manfaat prototipe ini adalah menyediakan dasar teknis yang dapat dikembangkan me
 T01_Milestone1_Problem_Framing_PEAS/
 ├── docs/
 │   ├── peas_specification.md       # Matriks PEAS dan karakteristik lingkungan
-│   └── problem_framing.md          # Konteks bisnis dan analisis masalah
+│   ├── problem_framing.md          # Konteks bisnis dan analisis masalah
+│   └── Grup18-Tugas02.md           # Naskah laporan Milestone 2
+├── data/
+│   ├── distance_matrix.json        # Matriks waktu/jarak bahaya ke shelter
+│   └── banda_aceh_drive.meta.json  # Metadata cakupan cache graf jalan
 ├── output/                         # PNG hasil visualisasi
+│   ├── benchmark_results.json      # Ringkasan eksperimen GA
+│   ├── benchmark_runtime.png       # Grafik waktu komputasi GA
+│   └── benchmark_convergence.png   # Grafik konvergensi GA
 ├── src/
+│   ├── benchmark.py                # Benchmark GA skala kecil dan besar
+│   ├── data_loader.py              # Matriks jarak/waktu berbasis graf jalan
+│   ├── ga_solver.py                # Solver Genetic Algorithm untuk alokasi
 │   ├── graph_model.py              # Model node, edge, dan graf evakuasi
 │   ├── heuristics.py               # Heuristik Euclidean untuk A*
 │   ├── search.py                   # UCS, A*, dan benchmark rute
+│   ├── visualize_map.py            # Visualisasi peta dan rute GA
 │   └── visualize.py                # Pembuatan peta dan grafik kinerja
 ├── tests/
-│   └── test_search.py              # Pengujian model, heuristik, dan algoritma
+│   ├── test_data_loader.py         # Pengujian matriks dan visualisasi peta
+│   ├── test_search.py              # Pengujian model, heuristik, dan pencarian
+│   └── test_solver.py              # Pengujian operator dan fitness GA
+├── cache/                          # Cache respons data, bila digunakan
 ├── pyproject.toml                  # Metadata proyek dan dependensi
 ├── uv.lock                         # Versi dependensi yang terkunci
 ├── run_ai.py                       # Demo layanan AI opsional
@@ -60,6 +93,14 @@ C(u, v) = distance_km * (1 + risk_factor) * (1 + congestion_factor)
 
 Edge yang tidak dapat dilalui memiliki biaya tak hingga dan tidak dikembalikan sebagai aksi valid.
 
+### Data Spasial dan Matriks Jarak
+
+`src/data_loader.py` memuat graf jalan berkendara dari cache GraphML bila cakupannya sesuai, atau meminta jaringan jalan melalui OSMnx. Untuk setiap titik bahaya, fungsi menghitung rute terpendek ke shelter menggunakan Dijkstra berbobot `travel_time`; jarak jalan dihitung dari panjang edge pada rute. Faktor kemacetan dapat mengalikan waktu, dan closure dapat menghapus node sekitar lokasi gangguan sehingga pasangan yang tidak terhubung menghasilkan `inf`.
+
+Jika graf jalan tidak dapat dimuat dan `allow_fallback=True`, data loader dapat memakai estimasi haversine dengan faktor kelikuasan dan kecepatan rata-rata yang ditetapkan. Nilai fallback adalah estimasi garis lurus yang disesuaikan, bukan waktu perjalanan OSM. Untuk hasil yang akan diklaim sebagai data jalan, pastikan JSON menunjukkan sumber `osm` dan verifikasi koordinat/demand/kapasitas dari sumber yang dapat dipercaya.
+
+`src/visualize_map.py` menggambar geometri edge/rute OSM bila graf tersedia. Dalam mode fallback, visualisasi memakai garis lurus dan menampilkan keterangan fallback.
+
 ### Algoritma Pencarian
 
 `src/search.py` menggunakan `heapq` sebagai priority queue.
@@ -70,6 +111,23 @@ Edge yang tidak dapat dilalui memiliki biaya tak hingga dan tidak dikembalikan s
 - `SearchResult` mengembalikan rute, shelter tujuan, biaya total, jumlah node yang diekspansi, urutan ekspansi, dan waktu eksekusi.
 
 Implementasi menggunakan pemeriksaan biaya terbaik (`best_costs` atau `best_g_costs`) untuk melewati entri priority queue yang sudah tidak optimal. Counter tambahan digunakan sebagai tie-breaker agar entri dengan prioritas sama tetap dapat diurutkan secara deterministik.
+
+### Optimasi Alokasi dengan Algoritma Genetika
+
+Modul `src/ga_solver.py` mengodekan kromosom sebagai dua bagian: indeks shelter untuk setiap truk, diikuti indeks truk untuk setiap titik bahaya. Dengan $k$ truk dan $n$ titik bahaya, panjang kromosom adalah $k+n$. Kromosom saat ini memilih alokasi truk/shelter, tetapi **belum mengodekan urutan kunjungan**, sehingga solver belum merepresentasikan VRP lengkap.
+
+Untuk truk $t$, total waktu $T_t$ adalah jumlah waktu dari titik bahaya yang ditugaskan ke truk tersebut menuju shelter pilihannya. Fungsi objective dan fitness yang benar-benar digunakan kode adalah:
+
+$$J(x)=T_{total}+T_{max}+P, \qquad F(x)=\frac{1}{J(x)+10^{-6}}$$
+
+Penalti total $P$ menjumlahkan:
+
+- **Kapasitas truk:** 100 poin untuk setiap unit demand yang melebihi kapasitas truk.
+- **Batas waktu:** 1.000 poin untuk setiap menit waktu truk yang melebihi 20 menit.
+- **Kapasitas shelter:** 50 poin untuk setiap unit demand yang melebihi kapasitas shelter.
+- **Jalur tak terjangkau:** fitness minimum `1e-9` saat total waktu tidak terhingga.
+
+GA memakai inisialisasi acak, tournament selection (ukuran maksimum 5 pada benchmark), crossover satu titik (probabilitas 0,8), mutasi per gen (rate 0,1), dan elitisme (2 individu). Elitisme mempertahankan solusi terbaik yang ditemukan, tetapi tidak menjamin optimum global.
 
 ### Alur Eksekusi
 
@@ -136,13 +194,35 @@ Perintah tersebut membuat atau memperbarui:
 - `output/skenario_rute_evakuasi.png`
 - `output/perbandingan_kinerja_ucs_vs_astar.png`
 
+Untuk visualisasi rute berdasarkan geometri OpenStreetMap, data loader menyediakan `plot_assignments()` dan `plot_truck_routes()` pada `src/visualize_map.py`. Perintah berikut menghasilkan peta rute default (memerlukan graf OSM/cache atau menjalankan fallback garis lurus):
+
+```powershell
+uv run python -m src.visualize_map
+```
+
+Output default disimpan sebagai `output/peta_rute_riil.png`. Jika data loader memakai fallback haversine, peta akan menampilkan garis lurus dan bukan geometri jalan aktual.
+
 ### Menjalankan Pengujian
 
 ```powershell
 uv run pytest -v
 ```
 
-Pengujian mencakup model graf, rumus biaya, goal test, admissibility dan konsistensi heuristik, optimalitas UCS dan A*, kasus titik awal yang sudah menjadi shelter, serta node terisolasi.
+Pengujian mencakup model graf, rumus biaya, goal test, admissibility dan konsistensi heuristik, optimalitas UCS dan A*, data loader, serta operator, penalti, dan edge case solver GA.
+
+### Menjalankan Benchmark Genetic Algorithm
+
+```powershell
+uv run python -m src.benchmark
+```
+
+Benchmark memakai seed awal `42` (seed berikutnya digunakan pada pengulangan selanjutnya), populasi `50`, `50` generasi, kapasitas truk `600`, dan tiga pengulangan per skenario. Untuk uji cepat, opsi dapat diperkecil:
+
+```powershell
+uv run python -m src.benchmark --repeats 1 --population-size 8 --generations 3
+```
+
+Hasil disimpan sebagai `output/benchmark_results.json`, `output/benchmark_runtime.png`, dan `output/benchmark_convergence.png`. Skenario besar memerlukan 10 titik bahaya, sedangkan matriks sumber saat ini berisi 4; benchmark menambahkan 6 baris sintetis yang ditandai pada JSON.
 
 ### Menjalankan Demo Layanan AI Opsional
 
@@ -150,7 +230,7 @@ Pengujian mencakup model graf, rumus biaya, goal test, admissibility dan konsist
 uv run python run_ai.py
 ```
 
-Demo dapat berjalan dalam mode tanpa API key. Untuk mode Gemini, buat file `.env` berdasarkan `.env.example` dan isi API key sesuai konfigurasi layanan yang digunakan. API key tidak boleh di-commit ke repository.
+Demo dapat berjalan dalam mode tanpa API key. Untuk mode Gemini, buat file `.env` berdasarkan `.env.example` dan isi API key sesuai konfigurasi layanan yang digunakan. Jangan commit file `.env` atau API key ke repositori.
 
 ## Hasil Eksekusi (Results)
 
@@ -158,7 +238,7 @@ Contoh hasil pengujian:
 
 ```text
 ============================= test session starts =============================
-collected 13 items
+collected 35 items
 
 tests/test_search.py::TestGraphModel::test_state_space_and_shelters PASSED
 tests/test_search.py::TestHeuristics::test_heuristic_admissibility_all_nodes PASSED
@@ -166,7 +246,7 @@ tests/test_search.py::TestSearchAlgorithms::test_search_optimality_and_equivalen
 ...
 tests/test_search.py::TestSearchAlgorithms::test_edge_case_isolated_node PASSED
 
-============================= 13 passed in 0.23s ================================
+============================= 35 passed ================================
 ```
 
 Setiap `PASSED` menunjukkan satu skenario valid. Pengujian optimalitas memastikan biaya rute UCS dan A* setara, sedangkan pengujian heuristik memastikan nilai estimasi tidak melebihi biaya optimal pada graf uji.
@@ -184,6 +264,40 @@ Contoh ringkasan keluaran pencarian:
 Biaya total adalah akumulasi biaya operasional setiap edge, bukan jarak fisik semata. Jumlah simpul yang diekspansi digunakan untuk membandingkan efisiensi pencarian; waktu eksekusi bersifat informatif dan dapat berbeda pada setiap komputer.
 
 Visualisasi menyajikan node bahaya, persimpangan, shelter, edge jaringan, rute A*, dan perbandingan jumlah ekspansi UCS terhadap A*. File PNG pada `output/` dapat digunakan dalam laporan atau presentasi.
+
+Hasil pencarian Milestone 1 pada graf model:
+
+| Titik bahaya | Shelter tujuan | Jarak | Biaya | Ekspansi UCS | Ekspansi A* | Penghematan ekspansi A* |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Ulee Lheue | TES Lambung | 1,80 km | 3,8400 | 4 | 4 | 0,0% |
+| Lampulo | Museum Tsunami | 5,40 km | 10,3080 | 6 | 6 | 0,0% |
+| Peunayong | Museum Tsunami | 3,20 km | 6,2930 | 6 | 5 | 16,7% |
+| Cut Mutia | Museum Tsunami | 2,30 km | 4,2770 | 4 | 3 | 25,0% |
+
+Biaya UCS dan A* sama pada keempat skenario, sedangkan A* mengurangi ekspansi pada dua skenario. Hasil ini berasal dari graf Milestone 1 dan tidak boleh dicampur dengan hasil alokasi GA.
+
+### Hasil Benchmark GA
+
+Benchmark dijalankan dengan seed `42` (tiga pengulangan), populasi `50`, `50` generasi, dan kapasitas truk `600`. Waktu adalah rata-rata satu evolusi pada mesin pengujian ini.
+
+| Skenario | Armada | Titik bahaya | Baris sintetis | Waktu rata-rata | Simpangan baku waktu | Fitness terbaik rata-rata |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Kecil | 3 | 2 | 0 | 0,03342 detik | 0,00309 detik | 0,19288780 |
+| Besar | 15 | 10 | 6 | 0,09749 detik | 0,00771 detik | 0,03023784 |
+
+Pada skala kecil, fitness terbaik tetap `0,19288780` dari generasi pertama hingga ke-50. Pada skala besar, fitness terbaik rata-rata meningkat dari sekitar `0,00480` pada generasi pertama menjadi `0,03024` pada generasi ke-50. Waktu skala besar sekitar 2,92 kali skala kecil pada mesin pengujian ini. Fitness antarukuran masalah tidak dibandingkan langsung karena jumlah penugasan dan skala fungsi objektif berbeda.
+
+Perbandingan waktu ini bersifat deskriptif: jumlah truk dan jumlah titik bahaya berubah bersamaan, sementara enam baris besar bersifat sintetis. Eksperimen ini tidak mengisolasi dampak satu faktor, tidak mengukur performa produksi, dan tidak membuktikan pengurangan kemacetan lapangan.
+
+![Perbandingan waktu komputasi benchmark GA](output/benchmark_runtime.png)
+
+![Konvergensi fitness benchmark GA](output/benchmark_convergence.png)
+
+### Batasan Data dan Interpretasi
+
+Matriks sumber memiliki empat titik bahaya; karena itu enam baris untuk skenario besar dibangkitkan secara sintetis dari baris sumber dengan variasi kecil. Selain itu, `src/data_loader.py` menandai koordinat, demand, dan kapasitas sebagai placeholder yang perlu diverifikasi terhadap sumber resmi. Hasil benchmark ini mengukur perilaku solver pada input yang tersedia, bukan bukti performa operasional atau akurasi rute untuk 10 lokasi nyata.
+
+Solver GA saat ini mengalokasikan titik bahaya ke truk dan shelter, tetapi tidak merepresentasikan urutan kunjungan dalam kromosom. Waktu rencana dihitung dengan menjumlahkan waktu titik bahaya-ke-shelter; oleh sebab itu, hasil belum mencakup optimasi rute kendaraan lengkap dengan urutan pickup.
 
 ## Analisis dan Evaluasi (Review and Future Improvements)
 
